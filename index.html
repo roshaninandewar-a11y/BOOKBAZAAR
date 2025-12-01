@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Bazaar - Share, Rent & Read</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Loading Spinner -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fas fa-book"></i>
+        <span>Book Bazaar</span>
+      </div>
+      
+      <div class="nav-menu" id="navMenu">
+        <a href="#home" class="nav-link active" onclick="navigateToSection('home')">
+          <i class="fas fa-home"></i> Home
+        </a>
+        <a href="#browse" class="nav-link" onclick="navigateToSection('browse')">
+          <i class="fas fa-book-open"></i> Browse
+        </a>
+        <a href="#nearby" class="nav-link" onclick="navigateToSection('nearby')">
+          <i class="fas fa-map-marker-alt"></i> Nearby
+        </a>
+        <a href="#add-book" class="nav-link" onclick="navigateToSection('add-book')">
+          <i class="fas fa-plus-circle"></i> Add Book
+        </a>
+        <a href="#rentals" class="nav-link" onclick="navigateToSection('rentals')">
+          <i class="fas fa-bookmark"></i> My Rentals
+        </a>
+        <a href="#contact" class="nav-link" onclick="navigateToSection('contact')">
+          <i class="fas fa-envelope"></i> Contact
+        </a>
+      </div>
+
+      <div class="nav-actions">
+        <button class="cart-btn" onclick="showCart()">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        
+        <div class="user-section" id="userSection">
+          <button class="btn-login" onclick="showAuthModal()">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+        </div>
+
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Home Section -->
+  <section class="section active" id="home">
+    <div class="hero">
+      <div class="hero-content">
+        <h1 class="hero-title">Welcome to Book Bazaar</h1>
+        <p class="hero-subtitle">Share, Rent & Read Your Favorite Books</p>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <i class="fas fa-book"></i>
+            <h3 id="totalBooks">0</h3>
+            <p>Books Available</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <h3 id="totalUsers">500+</h3>
+            <p>Active Users</p>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-handshake"></i>
+            <h3 id="totalRentals">1200+</h3>
+            <p>Books Rented</p>
+          </div>
+        </div>
+
+        <button class="btn-hero" onclick="navigateToSection('browse')">
+          Start Browsing <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Featured Books -->
+    <div class="container">
+      <h2 class="section-title">Featured Books</h2>
+      <div class="books-grid" id="featuredBooks"></div>
+    </div>
+  </section>
+
+  <!-- Browse Section -->
+  <section class="section" id="browse">
+    <div class="container">
+      <h2 class="section-title">Browse Books</h2>
+      
+      <div class="search-filter">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Search books or authors..." oninput="searchBooks()">
+        </div>
+        
+        <select id="genreFilter" onchange="filterBooks()" class="filter-select">
+          <option value="all">All Genres</option>
+          <option value="fiction">Fiction</option>
+          <option value="non-fiction">Non-Fiction</option>
+          <option value="self-help">Self-Help</option>
+          <option value="biography">Biography</option>
+          <option value="science">Science</option>
+          <option value="history">History</option>
+        </select>
+      </div>
+
+      <div class="books-grid" id="booksGrid"></div>
+    </div>
+  </section>
+
+  <!-- Nearby Books Section -->
+  <section class="section" id="nearby">
+    <div class="container">
+      <h2 class="section-title">
+        <i class="fas fa-map-marker-alt"></i> Books Near You
+      </h2>
+      <p class="section-subtitle">Find books available in your area</p>
+ 
+      <!-- Location Search -->
+      <div class="location-search">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="locationSearch" placeholder="Enter your location...">
+        </div>
+        <button class="btn-primary" onclick="getCurrentLocation()">
+          <i class="fas fa-crosshairs"></i> Use My Location
+        </button>
+      </div>
+
+      <!-- Nearby Books List -->
+      <div class="nearby-books">
+        <h3>Available Books Nearby</h3>
+        <div class="books-grid" id="nearbyBooksGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Add Book Section -->
+  <section class="section" id="add-book">
+    <div class="container">
+      <div class="form-container">
+        <h2 class="section-title">Add Your Book</h2>
+        <p class="section-subtitle">Share your books with the community!</p>
+        
+        <form id="addBookForm" onsubmit="addBook(event)">
+          <div class="form-grid">
+            <div class="input-group">
+              <label><i class="fas fa-book"></i> Book Title *</label>
+              <input type="text" name="title" placeholder="Enter book title" required>
+            </div>
+            
+            <div class="input-group">
+              <label><i class="fas fa-pen"></i> Author Name *</label>
+              <input type="text" name="author" placeholder="Enter author name" required>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="input-group">
+              <label><i class="fas fa-tag"></i> Genre *</label>
+              <select name="genre" required>
+                <option value="">Select Genre</option>
+                <option value="fiction">Fiction</option>
+                <option value="non-fiction">Non-Fiction</option>
+                <option value="self-help">Self-Help</option>
+                <option value="biography">Biography</option>
+                <option value="science">Science</option>
+                <option value="history">History</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label><i class="fas fa-rupee-sign"></i> Rental Price (₹) *</label>
+              <input type="number" name="price" placeholder="Enter rental price" min="1" required>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label><i class="fas fa-image"></i> Book Cover URL</label>
+            <input type="url" name="cover" placeholder="https://example.com/image.jpg (optional)">
+          </div>
+
+          <div class="input-group">
+            <label><i class="fas fa-map-marker-alt"></i> Your Location *</label>
+            <input type="text" id="bookLocation" name="location" placeholder="Enter your location" required>
+          </div>
+
+          <div class="input-group">
+            <label><i class="fas fa-align-left"></i> Description</label>
+            <textarea name="description" placeholder="Brief description of the book (optional)" rows="4"></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <i class="fas fa-plus-circle"></i> Add Book
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- My Rentals Section -->
+  <section class="section" id="rentals">
+    <div class="container">
+      <h2 class="section-title">My Rentals</h2>
+      
+      <div class="rental-tabs">
+        <button class="tab-btn active" onclick="showRentalTab('rented')">
+          <i class="fas fa-book-reader"></i> Books I Rented
+        </button>
+        <button class="tab-btn" onclick="showRentalTab('mybooks')">
+          <i class="fas fa-book"></i> My Books
+        </button>
+        <button class="tab-btn" onclick="showRentalTab('history')">
+          <i class="fas fa-history"></i> History
+        </button>
+      </div>
+
+      <div class="rental-content" id="rentalContent">
+        <div class="empty-state">
+          <i class="fas fa-book-open"></i>
+          <p>Please login to view your rentals</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section" id="contact">
+    <div class="container">
+      <h2 class="section-title">Get In Touch</h2>
+      <p class="section-subtitle">Have questions? We'd love to hear from you!</p>
+      
+      <div class="contact-grid">
+        <form class="contact-form" onsubmit="sendMessage(event)">
+          <div class="input-group">
+            <label><i class="fas fa-user"></i> Your Name *</label>
+            <input type="text" name="name" placeholder="Enter your name" required>
+          </div>
+          
+          <div class="input-group">
+            <label><i class="fas fa-envelope"></i> Your Email *</label>
+            <input type="email" name="email" placeholder="Enter your email" required>
+          </div>
+          
+          <div class="input-group">
+            <label><i class="fas fa-comment"></i> Your Message *</label>
+            <textarea name="message" placeholder="Enter your message" rows="5" required></textarea>
+          </div>
+          
+          <button type="submit" class="btn-submit">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+
+        <div class="contact-info">
+          <div class="info-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>Our Location</h3>
+            <p>Mumbai, Maharashtra, India</p>
+          </div>
+          
+          <div class="info-card">
+            <i class="fas fa-envelope"></i>
+            <h3>Email Us</h3>
+            <p>roshaninandewar@gmail.com</p>
+            <p>pramodpadol70@gmail.com</p>
+          </div>
+          
+          <div class="info-card">
+            <i class="fas fa-phone"></i>
+            <h3>Call Us</h3>
+            <p>+91 8097951950 (Roshani)</p>
+            <p>+91 9359995371 (Pramod)</p>
+          </div>
+          
+          <div class="info-card">
+            <i class="fas fa-clock"></i>
+            <h3>Working Hours</h3>
+            <p>Mon - Sat: 9AM - 6PM</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-section">
+          <h3><i class="fas fa-book"></i> Book Bazaar</h3>
+          <p>Your community for sharing and renting books. Read more, spend less!</p>
+          <div class="social-links">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+          </div>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#browse">Browse Books</a></li>
+            <li><a href="#nearby">Nearby Books</a></li>
+            <li><a href="#add-book">Add Book</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">FAQs</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Newsletter</h4>
+          <p>Get updates about new books!</p>
+          <div class="newsletter">
+            <input type="email" placeholder="Your email">
+            <button><i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2024 Book Bazaar. Made  by Roshani & Pramod</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Auth Modal -->
+  <div class="modal" id="authModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeAuthModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchAuthTab('login')">Login</button>
+        <button class="modal-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="login(event)">
+        <div class="input-group">
+          <label><i class="fas fa-envelope"></i> Email Address</label>
+          <input type="email" name="email" placeholder="Enter your email" required>
+        </div>
+        <div class="input-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signupForm" style="display:none;" onsubmit="signup(event)">
+        <div class="input-group">
+          <label><i class="fas fa-user"></i> Full Name</label>
+          <input type="text" name="name" placeholder="Enter your full name" required>
+        </div>
+        <div class="input-group">
+          <label><i class="fas fa-envelope"></i> Email Address</label>
+          <input type="email" name="email" placeholder="Enter your email" required>
+        </div>
+        <div class="input-group">
+          <label><i class="fas fa-phone"></i> Phone Number</label>
+          <input type="tel" name="phone" placeholder="+91 1234567890" required>
+        </div>
+        <div class="input-group">
+          <label><i class="fas fa-map-marker-alt"></i> Your Location</label>
+          <input type="text" id="signupLocation" name="location" placeholder="Enter your location" required>
+        </div>
+        <div class="input-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" name="password" placeholder="Minimum 6 characters" required minlength="6">
+        </div>
+        <div class="input-group">
+          <label><i class="fas fa-lock"></i> Confirm Password</label>
+          <input type="password" name="confirm_password" placeholder="Re-enter password" required minlength="6">
+        </div>
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cart Modal -->
+  <div class="modal" id="cartModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeCart()">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <h2><i class="fas fa-shopping-cart"></i> Your Cart</h2>
+      <div id="cartItems"></div>
+      <div class="cart-total">
+        <span>Total:</span>
+        <span id="cartTotal">₹0</span>
+      </div>
+      <button class="btn-submit" onclick="proceedToPayment()">
+        <i class="fas fa-credit-card"></i> Proceed to Payment
+      </button>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal" id="paymentModal">
+    <div class="modal-content payment-modal">
+      <button class="modal-close" onclick="closePayment()">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <h2><i class="fas fa-credit-card"></i> Payment</h2>
+      <div class="payment-summary" id="paymentSummary"></div>
+      
+      <div class="payment-methods">
+        <h3>Select Payment Method</h3>
+        <label class="payment-option">
+          <input type="radio" name="payment" value="upi" checked>
+          <div class="payment-info">
+            <i class="fab fa-google-pay"></i>
+            <span>UPI (Google Pay, PhonePe, Paytm)</span>
+          </div>
+        </label>
+        <label class="payment-option">
+          <input type="radio" name="payment" value="card">
+          <div class="payment-info">
+            <i class="fas fa-credit-card"></i>
+            <span>Credit/Debit Card</span>
+          </div>
+        </label>
+        <label class="payment-option">
+          <input type="radio" name="payment" value="netbanking">
+          <div class="payment-info">
+            <i class="fas fa-university"></i>
+            <span>Net Banking</span>
+          </div>
+        </label>
+        <label class="payment-option">
+          <input type="radio" name="payment" value="cod">
+          <div class="payment-info">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Cash on Delivery</span>
+          </div>
+        </label>
+      </div>
+      
+      <button class="btn-submit" onclick="completePayment()">
+        <i class="fas fa-check-circle"></i> Complete Payment
+      </button>
+    </div>
+  </div>
+
+  <!-- Chatbot -->
+  <div class="chatbot" id="chatbot">
+    <div class="chatbot-header" onclick="toggleChatbot()">
+      <i class="fas fa-comments"></i>
+      <span>Chat with us</span>
+      <i class="fas fa-chevron-down" id="chatToggle"></i>
+    </div>
+    <div class="chatbot-body" id="chatbotBody">
+      <div class="chat-messages" id="chatMessages">
+        <div class="bot-message">
+          Hi! I'm your Book Bazaar assistant. How can I help you today?
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleChatEnter(event)">
+        <button onclick="sendChatMessage()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
